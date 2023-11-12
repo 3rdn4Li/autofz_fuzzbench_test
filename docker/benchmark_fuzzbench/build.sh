@@ -1,13 +1,13 @@
 #!/bin/bash -e
 SCRIPT_DIR=$(dirname $(realpath $0))
-IMAGE_PREFIX=autofz_bench
+IMAGE_PREFIX=autofz_fuzzbench
 FUZZER_PREFIX=fuzzer_fuzzbench
 
 # NOTE: order is important becasue of dependencies between Dockerfile
 fuzzer_list=(
     fuzzer-test-suite
     #fuzzer-test-suite-angora
-    fuzzer-test-suite-libfuzzer
+    #fuzzer-test-suite-libfuzzer
     fuzzer-test-suite-aflplusplus
     fuzzer-test-suite-lafintel
     #aflplusplus

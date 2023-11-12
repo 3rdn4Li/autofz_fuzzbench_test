@@ -1,5 +1,0 @@
-<?php
-
-<<ZendTestAttribute>>
-function foo() {
-}

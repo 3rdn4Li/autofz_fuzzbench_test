@@ -1,7 +1,7 @@
 #!/bin/bash -e
 SCRIPT_DIR=$(dirname $(realpath $0))
 IMAGE_PREFIX=autofz
-BENCHMARK_PREFIX=autofz_bench
+BENCHMARK_PREFIX=autofz_fuzzbench
 
 USER=autofz
 

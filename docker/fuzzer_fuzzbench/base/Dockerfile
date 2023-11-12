@@ -1,5 +1,4 @@
 FROM ubuntu:20.04
-
 SHELL ["/bin/bash", "-c"]
 
 ENV DEBIAN_FRONTEND=noninteractive \
@@ -31,7 +30,6 @@ RUN apt install -y make autoconf automake libtool shtool
 
 # Fuzzbench
 RUN apt install -y ninja-build wget cmake
-
 RUN echo "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-12 main" >> /etc/apt/sources.list && \
   echo "deb-src http://apt.llvm.org/xenial/ llvm-toolchain-xenial-12 main" >> /etc/apt/sources.list && \
   apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 15CF4D18AF4F7421 && \

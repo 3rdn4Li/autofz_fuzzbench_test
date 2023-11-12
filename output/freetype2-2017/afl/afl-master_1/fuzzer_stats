@@ -1,0 +1,30 @@
+start_time        : 1699819694
+last_update       : 1699832153
+fuzzer_pid        : 268
+cycles_done       : 0
+execs_done        : 959048
+execs_per_sec     : 0.51
+paths_total       : 2617
+paths_favored     : 523
+paths_found       : 748
+paths_imported    : 1867
+max_depth         : 3
+cur_path          : 72
+pending_favs      : 522
+pending_total     : 2613
+variable_paths    : 1
+stability         : 99.97%
+bitmap_cvg        : 5.97%
+unique_crashes    : 0
+unique_hangs      : 0
+last_path         : 1699831994
+last_crash        : 0
+last_hang         : 0
+execs_since_crash : 959048
+exec_timeout      : 1000
+afl_banner        : afl-master_1
+afl_version       : 2.57b
+target_mode       : persistent deferred 
+command_line      : /fuzzer/afl/afl-fuzz -i /seeds/fuzzer-test-suite/freetype2-2017 -o /work/autofz/output/freetype2-2017/afl -m none -t 1000+ -M afl-master_1 -- /d/p/justafl/fuzzer-test-suite/freetype2-2017/freetype2-2017 @@
+slowest_exec_ms   : 1000
+peak_rss_mb       : not available while afl is running

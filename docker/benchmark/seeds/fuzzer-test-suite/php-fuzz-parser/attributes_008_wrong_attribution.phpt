@@ -1,4 +1,0 @@
-<?php
-
-<<Attribute>>
-function foo() {}

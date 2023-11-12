@@ -1,0 +1,1 @@
+/usr/local/bin/autofz -o output -T 24h -f afl aflfast mopt redqueen lafintel fairfuzz -t freetype2-2017
