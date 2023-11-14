@@ -6,6 +6,7 @@ import sys
 import tarfile
 import subprocess
 import shutil
+import statistics
 
 
 
@@ -212,6 +213,7 @@ def coverage(data_folder:str,coverage_folder:str):
     
 
 def report(data_folder: str,coverage_folder:str):
+    coverage_report={}
     data_folder=os.path.abspath(data_folder)
     coverage_folder=os.path.abspath(coverage_folder)
     for target_d in os.listdir(data_folder):
@@ -224,6 +226,10 @@ def report(data_folder: str,coverage_folder:str):
             target_fuzzer_dir=os.path.join(target_dir, fuzzer_d)
             if not os.path.isdir(target_fuzzer_dir):
                 continue
+            regions=[]
+            functions=[]
+            lines=[]
+            branches=[]
             for trail_d in os.listdir(target_fuzzer_dir):
                 target_fuzzer_trail_dir=os.path.join(target_fuzzer_dir, trail_d)
                 if not os.path.isdir(target_fuzzer_trail_dir):
@@ -233,10 +239,23 @@ def report(data_folder: str,coverage_folder:str):
                 coverage_binary_list=os.listdir(os.path.join(coverage_folder,target_d))
                 if len(coverage_binary_list)>1:
                         error_exit(f"{os.path.join(coverage_folder,target_d)} has more than one binary, there should be only one!")
-                coverage_binary=os.path.join(coverage_folder,target_d,coverage_binary_list[0])
+                coverage_binary=os.path.abspath(os.path.join(coverage_folder,target_d,coverage_binary_list[0]))
                 logger.info(f"target: {target_d}, trail: {trail_d}, fuzzer: {fuzzer_d}")
-                os.system(f"llvm-cov report -instr-profile=default.profdata {coverage_binary} | grep TOTAL")
+                target_fuzzer_trail_dir=os.path.abspath(target_fuzzer_trail_dir)
+                #llvm-cov report -instr-profile=default.profdata {coverage_binary}
+                output = subprocess.check_output(f"llvm-cov report -instr-profile=default.profdata {coverage_binary} | grep TOTAL",text=True, shell=True)
+                region=int(output.split()[1])-int(output.split()[2])
+                regions.append(region)
+                function=int(output.split()[4])-int(output.split()[5])
+                functions.append(function)
+                line=int(output.split()[7])-int(output.split()[8])
+                lines.append(line)
+                branch=int(output.split()[10])-int(output.split()[11])
+                branches.append(branch)
                 os.chdir(current_directory)
+            print(f"target:{target_d}, fuzzer:{fuzzer_d}")
+            print(f"reg mean: {statistics.mean(regions)} reg std: {statistics.stdev(regions)} func mean: {statistics.mean(functions)} func std: {statistics.stdev(functions)}\
+ line mean: {statistics.mean(lines)} line std: {statistics.stdev(lines)} branch mean: {statistics.mean(branches)} branch std: {statistics.stdev(branches)}")
 
 
 def extract_seeds(src:str, dst:str):
