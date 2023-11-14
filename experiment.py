@@ -43,8 +43,8 @@ def main():
     parser_report.set_defaults(func=coverage)  
 
     parser_report=subparsers.add_parser("report", help="Generate experiment report")
-    parser_report.add_argument("-d","--experiment_directory", required=True,help="Experiment directory")
-    parser_report.add_argument("-t","--fuzz_target", nargs="+", choices=supported_targets, default=supported_targets, help="Fuzz targets")
+    parser_report.add_argument("-df","--data_folder", required=True,help="Folder storing data for computing coverage")
+    parser_report.add_argument("-cf","--coverage_folder", required=True, help="Folder containing coverage binaries")
     parser_report.set_defaults(func=report)   
     
     args=parser.parse_args()
@@ -211,9 +211,32 @@ def coverage(data_folder:str,coverage_folder:str):
 
     
 
-def report(experiment_directory: str, fuzz_target: List[str]):
-    logger.info(f"Generating report for experiment {experiment_directory}")
-    logger.info(f"Fuzz targets: {fuzz_target}")
+def report(data_folder: str,coverage_folder:str):
+    data_folder=os.path.abspath(data_folder)
+    coverage_folder=os.path.abspath(coverage_folder)
+    for target_d in os.listdir(data_folder):
+        if target_d not in supported_targets:
+            continue
+        target_dir=os.path.join(data_folder, target_d)
+        if not os.path.isdir(target_dir):
+            continue
+        for fuzzer_d in os.listdir(target_dir):
+            target_fuzzer_dir=os.path.join(target_dir, fuzzer_d)
+            if not os.path.isdir(target_fuzzer_dir):
+                continue
+            for trail_d in os.listdir(target_fuzzer_dir):
+                target_fuzzer_trail_dir=os.path.join(target_fuzzer_dir, trail_d)
+                if not os.path.isdir(target_fuzzer_trail_dir):
+                    continue
+                current_directory = os.getcwd()
+                os.chdir(target_fuzzer_trail_dir)
+                coverage_binary_list=os.listdir(os.path.join(coverage_folder,target_d))
+                if len(coverage_binary_list)>1:
+                        error_exit(f"{os.path.join(coverage_folder,target_d)} has more than one binary, there should be only one!")
+                coverage_binary=os.path.join(coverage_folder,target_d,coverage_binary_list[0])
+                logger.info(f"target: {target_d}, trail: {trail_d}, fuzzer: {fuzzer_d}")
+                os.system(f"llvm-cov report -instr-profile=default.profdata {coverage_binary} | grep TOTAL")
+                os.chdir(current_directory)
 
 
 def extract_seeds(src:str, dst:str):
