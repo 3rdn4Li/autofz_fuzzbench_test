@@ -46,7 +46,19 @@ def main():
     parser_report=subparsers.add_parser("report", help="Generate experiment report")
     parser_report.add_argument("-df","--data_folder", required=True,help="Folder storing data for computing coverage")
     parser_report.add_argument("-cf","--coverage_folder", required=True, help="Folder containing coverage binaries")
-    parser_report.set_defaults(func=report)   
+    parser_report.set_defaults(func=report)
+
+    parser_report=subparsers.add_parser("source_cov", help="Generate source-based code coverage, source code required")
+    parser_report.add_argument("-df","--data_folder", required=True,help="Folder storing data for computing coverage")
+    parser_report.add_argument("-cf","--coverage_folder", required=True, help="Folder containing coverage binaries")
+    parser_report.set_defaults(func=source_cov)
+
+    parser_report=subparsers.add_parser("sieve", help="Find the first seed that covers a specific line in a specific file, source code required")
+    parser_report.add_argument("-tf","--trail_folder", required=True,help="Trail folder containing seeds")
+    parser_report.add_argument("-cb","--coverage_binary", required=True, help="Coverage binary")
+    parser_report.add_argument("-f","--file_name", required=True, help="The file you want to cover")
+    parser_report.add_argument("-l","--line", required=True, help="The line you want to cover")
+    parser_report.set_defaults(func=sieve)     
     
     args=parser.parse_args()
     dict_args = vars(args)
@@ -190,18 +202,18 @@ def coverage(data_folder:str,coverage_folder:str):
                         seed_all.append(seed)
                 logger.info(f"running coverage binary using seeds of {target_fuzzer_trail_dir}")
                 #in linux, the length of args are restricted
-                if(len(seed_all)<=10000):
+                if(len(seed_all)<=8000):
                     run_coverage_cmd=[coverage_binary]
                     run_coverage_cmd+=seed_all
                     process=subprocess.Popen(run_coverage_cmd,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
                     process.wait()
                 else:
-                    for i in range(0,len(seed_all),10000):
+                    for i in range(0,len(seed_all),8000):
                         llvm_env={
                             "LLVM_PROFILE_FILE":f"{i}.profraw"
                         }
                         run_coverage_cmd=[coverage_binary]
-                        run_coverage_cmd+=seed_all[i:min(i+10000,len(seed_all))]
+                        run_coverage_cmd+=seed_all[i:min(i+8000,len(seed_all))]
                         process=subprocess.Popen(run_coverage_cmd,stdout=subprocess.DEVNULL,env=llvm_env,stderr=subprocess.DEVNULL)
                         process.wait()
                 os.system("llvm-profdata merge -sparse *.profraw -o default.profdata")
@@ -213,7 +225,6 @@ def coverage(data_folder:str,coverage_folder:str):
     
 
 def report(data_folder: str,coverage_folder:str):
-    coverage_report={}
     data_folder=os.path.abspath(data_folder)
     coverage_folder=os.path.abspath(coverage_folder)
     for target_d in os.listdir(data_folder):
@@ -257,6 +268,74 @@ def report(data_folder: str,coverage_folder:str):
             print(f"reg mean: {statistics.mean(regions)} reg std: {statistics.stdev(regions)} func mean: {statistics.mean(functions)} func std: {statistics.stdev(functions)}\
  line mean: {statistics.mean(lines)} line std: {statistics.stdev(lines)} branch mean: {statistics.mean(branches)} branch std: {statistics.stdev(branches)}")
 
+def source_cov(data_folder: str,coverage_folder:str):
+    if not os.path.exists("source_cov"):
+        try_makedirs("source_cov")
+    data_folder=os.path.abspath(data_folder)
+    coverage_folder=os.path.abspath(coverage_folder)
+    for target_d in os.listdir(data_folder):
+        if target_d not in supported_targets:
+            continue
+        target_dir=os.path.join(data_folder, target_d)
+        if not os.path.isdir(target_dir):
+            continue
+        for fuzzer_d in os.listdir(target_dir):
+            target_fuzzer_dir=os.path.join(target_dir, fuzzer_d)
+            if not os.path.isdir(target_fuzzer_dir):
+                continue
+            for trail_d in os.listdir(target_fuzzer_dir):
+                target_fuzzer_trail_dir=os.path.join(target_fuzzer_dir, trail_d)
+                if not os.path.isdir(target_fuzzer_trail_dir):
+                    continue
+                current_directory = os.getcwd()
+                os.chdir(target_fuzzer_trail_dir)
+                coverage_binary_list=os.listdir(os.path.join(coverage_folder,target_d))
+                if len(coverage_binary_list)>1:
+                        error_exit(f"{os.path.join(coverage_folder,target_d)} has more than one binary, there should be only one!")
+                coverage_binary=os.path.abspath(os.path.join(coverage_folder,target_d,coverage_binary_list[0]))
+                logger.info(f"target: {target_d}, trail: {trail_d}, fuzzer: {fuzzer_d}")
+                target_fuzzer_trail_dir=os.path.abspath(target_fuzzer_trail_dir)
+                sourcecov_file=os.path.join(current_directory,"source_cov",f'{target_d}_{fuzzer_d}_{trail_d}_sourcecov')
+                subprocess.check_output(f"llvm-cov show -instr-profile=default.profdata {coverage_binary} > {sourcecov_file}",text=True, shell=True)
+                os.chdir(current_directory)
+
+def sieve(trail_folder: str,coverage_binary:str, file_name:str, line:str):
+    if os.path.exists("sieve_tmp"):
+        try_rmdirs("sieve_tmp")
+    try_makedirs("sieve_tmp")
+    sieve_tmp=os.path.abspath("sieve_tmp")
+    trail_folder=os.path.abspath(trail_folder)
+    coverage_binary=os.path.abspath(coverage_binary)
+    current_directory = os.getcwd()
+    os.chdir(sieve_tmp)
+    seeds=[sd for sd in os.listdir(trail_folder) if sd.startswith("id:")]
+    i=0
+    for seed in sorted(seeds, key=lambda s: float(s[-12:])):
+        if (not os.path.isdir(os.path.join(trail_folder,seed))):
+            i+=1
+            if i%100==0:
+                logger.info(f"{i} seeds proceeded")
+            os.system("rm -rf *.prof*")
+            run_coverage_cmd=[coverage_binary,os.path.join(trail_folder,seed)]
+            process=subprocess.Popen(run_coverage_cmd,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
+            process.wait()
+            os.system("llvm-profdata merge -sparse *.profraw -o default.profdata")
+            assert(os.path.exists("default.profdata"))
+            output=subprocess.check_output(f"llvm-cov show -instr-profile=default.profdata {coverage_binary}",text=True, shell=True)
+            after_file=output.split(file_name)[1]
+            after_line=after_file.split(line)[1]
+            hit_num=int(after_line.split("|")[1])
+            if hit_num>0:
+                print(seed)
+                break
+    os.chdir(current_directory)  
+
+
+
+        
+      
+
+
 
 def extract_seeds(src:str, dst:str):
     for filename in os.listdir(src):
@@ -264,31 +343,45 @@ def extract_seeds(src:str, dst:str):
             source_file = os.path.join(src, filename)
             with tarfile.open(source_file, 'r:gz') as tar:
                 tar.extractall(dst)
+    seeds=sorted([seed for seed in os.listdir(dst) if seed.startswith("id:")])
+    start_time=os.path.getmtime(os.path.join(dst,seeds[0]))
+    for seed in seeds:
+        mod_time=f"{os.path.getmtime(os.path.join(dst,seed))-start_time:.12f}"[:12]
+        try_rename(os.path.join(dst,seed),os.path.join(dst,seed+"_"+f"{mod_time}"))
 
 def copy_seeds(src:str, dst:str,timeover:int):
-    if (timeover==0):
-        seeds=[seed for seed in os.listdir(src) if seed.startswith("id:")]
-    else:
-        seeds=sorted([seed for seed in os.listdir(src) if seed.startswith("id:")])
-        start_time=os.path.getctime(os.path.join(src,seeds[0]))
-        seeds=[seed for seed in seeds if (os.path.getctime(os.path.join(src,seed))-start_time<=timeover*60*60)]
+    fuzz_name=src.split("/")[-3]
+    seeds=sorted([seed for seed in os.listdir(src) if seed.startswith("id:")])
+    start_time=os.path.getmtime(os.path.join(src,seeds[0]))
+    if (timeover!=0):
+        seeds=[seed for seed in seeds if (os.path.getmtime(os.path.join(src,seed))-start_time<=timeover*60*60)]
     for seed in seeds:
-        try_copy(os.path.join(src,seed),dst)
+        mod_time=f"{os.path.getmtime(os.path.join(src,seed))-start_time:.12f}"[:12]
+        try_copy(os.path.join(src,seed),os.path.join(dst,seed+"_"+fuzz_name+"_"+f"{mod_time}"))
         
 
 def try_makedirs(dir:str):
     try:
         os.makedirs(dir)
     except Exception as e:
-        logger.error(e)
-        sys.exit()
+        error_exit(e)
+
+def try_rmdirs(dir:str):
+    try:
+        shutil.rmtree(dir)
+    except Exception as e:
+        error_exit(e)
 
 def try_copy(src:str,dir:str):
     try:
         shutil.copy(src,dir)
     except Exception as e:
-        logger.error(e)
-        sys.exit()
+        error_exit(e)
+def try_rename(src:str,dir:str):
+    try:
+        os.rename(src, dir)
+    except Exception as e:
+        error_exit(e)
 
 def error_exit(emessage):
     logger.error(emessage)
