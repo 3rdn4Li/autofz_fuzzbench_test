@@ -8,8 +8,8 @@ fuzzer_list=(
     fuzzer-test-suite
     #fuzzer-test-suite-angora
     #fuzzer-test-suite-libfuzzer
-    fuzzer-test-suite-aflplusplus
-    fuzzer-test-suite-lafintel
+    #fuzzer-test-suite-aflplusplus
+    #fuzzer-test-suite-lafintel
     #aflplusplus
     #afl
     #gcc

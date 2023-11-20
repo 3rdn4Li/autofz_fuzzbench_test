@@ -96,7 +96,7 @@ def launch(experiment_name: str, fuzzer: List[str], fuzz_target: List[str],trail
                 cmd_launch= f"docker run --name {trail_name} --cpus={cpu_number} -d --privileged -v $PWD:/work/autofz -w /work/autofz \
 -it autofz /bin/bash -c \"sudo /init.sh && autofz -o output -T 24h -f {' '.join(map(str, fuzzer))} -j{cpu_number} -p -t {fz_target}\""
             logger.info(cmd_launch)
-            #os.system(cmd_launch)
+            os.system(cmd_launch)
             os.chdir(current_directory)
   
 
@@ -327,6 +327,9 @@ def sieve(trail_folder: str,coverage_binary:str, file_name:str, line:str):
             hit_num=int(after_line.split("|")[1])
             if hit_num>0:
                 print(seed)
+                with open("cov"+os.path.basename(seed), "w") as file:
+                    file.write(output)
+                try_copy(os.path.join(trail_folder,seed),".")
                 break
     os.chdir(current_directory)  
 
