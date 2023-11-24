@@ -1,6 +1,5 @@
 ARG FUZZER_PREFIX
 FROM $FUZZER_PREFIX/aflplusplus
-
 RUN mkdir /d
 
 COPY source/ /autofz_bench

@@ -6,6 +6,10 @@
 
 readonly INSTALL_DIR="$PWD/INSTALL"
 
+#what a hidden problem!! It's a bug of clang fixed in clang 10, see https://stackoverflow.com/questions/62334452/fast-math-cause-undefined-reference-to-pow-finite
+export CFLAGS="$CFLAGS -fno-finite-math-only"
+export CXXFLAGS="$CXXFLAGS -fno-finite-math-only"
+
 build_ogg() {
   rm -rf BUILD/ogg
   mkdir -p BUILD/ogg $INSTALL_DIR
@@ -28,6 +32,7 @@ build_vorbis() {
     --disable-shared \
     && make clean && make -j $JOBS && make install)
 }
+#glibc 2.31 have removed __log_finite() and __pow_finite(), so -ffast-math could not be used, what a hidden problem!!
 
 download_fuzz_target() {
   [[ ! -e SRC/oss-fuzz ]] && \
@@ -39,7 +44,7 @@ download_fuzz_target() {
 get_git_revision https://github.com/xiph/ogg.git \
   c8391c2b267a7faf9a09df66b1f7d324e9eb7766 SRC/ogg
 get_git_revision https://github.com/xiph/vorbis.git \
-  84c023699cdf023a32fa4ded32019f194afcdad0 SRC/vorbis
+  c1c2831fc7306d5fbd7bc800324efd12b28d327f SRC/vorbis #84c023699cdf023a32fa4ded32019f194afcdad0
 download_fuzz_target
 set -x
 build_ogg
