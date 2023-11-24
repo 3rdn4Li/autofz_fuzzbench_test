@@ -7,7 +7,7 @@ fuzzer_list=(
     aflplusplus
     afl
     aflfast
-    #angora
+    angora
     mopt
     fairfuzz
     lafintel

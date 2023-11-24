@@ -20,7 +20,6 @@ mkdir /work
 export WORK=/work
 export OUT=/out
 build_fuzzer
-
 if [[ $FUZZING_ENGINE == "hooks" ]]; then
   # Link ASan runtime so we can hook memcmp et al.
   LIB_FUZZING_ENGINE="$LIB_FUZZING_ENGINE -fsanitize=address"

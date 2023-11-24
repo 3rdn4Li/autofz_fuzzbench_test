@@ -54,3 +54,8 @@ fi
 $CXX $CXXFLAGS SRC/oss-fuzz/projects/vorbis/decode_fuzzer.cc \
   -o $EXECUTABLE_NAME_BASE-$EXECUTABLE_NAME_EXT -L"$INSTALL_DIR/lib" -I"$INSTALL_DIR/include" \
   $LIB_FUZZING_ENGINE -lvorbisfile  -lvorbis -logg
+
+if [[ ! -d /seeds/fuzzer-test-suite/vorbis-2017-12-11 ]]; then
+  mkdir -p /seeds/fuzzer-test-suite/vorbis-2017-12-11
+  cp /autofz_bench/fuzzer-test-suite/vorbis-2017-12-11/seeds/* /seeds/fuzzer-test-suite/vorbis-2017-12-11/
+fi

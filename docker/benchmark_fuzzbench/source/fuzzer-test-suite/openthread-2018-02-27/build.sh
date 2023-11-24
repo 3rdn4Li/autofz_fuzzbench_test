@@ -17,7 +17,7 @@ export OUT=/out
 
 pushd openthread
 rm -rf build
-bash tests/fuzz/oss-fuzz-build
+tests/fuzz/oss-fuzz-build
 popd
 
 cp /out/ot-ip6-send-fuzzer openthread-2018-02-27-out

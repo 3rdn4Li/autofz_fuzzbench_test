@@ -1,6 +1,6 @@
 ARG FUZZER_PREFIX
 FROM $FUZZER_PREFIX/lafintel
-
+ARG a=1
 RUN mkdir /d
 
 COPY source/ /autofz_bench

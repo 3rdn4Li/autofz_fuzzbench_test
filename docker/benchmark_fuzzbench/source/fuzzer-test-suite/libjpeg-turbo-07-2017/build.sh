@@ -3,6 +3,7 @@
 # Licensed under the Apache License, Version 2.0 (the "License");
 . $(dirname $0)/../custom-build.sh $1 $2
 . $(dirname $0)/../common.sh
+
 apt-get update && \
     apt-get install -y make yasm cmake
 get_git_revision https://github.com/libjpeg-turbo/libjpeg-turbo.git 3b19db4e6e7493a748369974819b4c5fa84c7614 SRC

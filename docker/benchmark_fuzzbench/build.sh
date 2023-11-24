@@ -5,11 +5,11 @@ FUZZER_PREFIX=fuzzer_fuzzbench
 
 # NOTE: order is important becasue of dependencies between Dockerfile
 fuzzer_list=(
-    fuzzer-test-suite
-    #fuzzer-test-suite-angora
+    # fuzzer-test-suite
+    fuzzer-test-suite-angora
     #fuzzer-test-suite-libfuzzer
-    #fuzzer-test-suite-aflplusplus
-    #fuzzer-test-suite-lafintel
+    # fuzzer-test-suite-aflplusplus
+    # fuzzer-test-suite-lafintel
     #aflplusplus
     #afl
     #gcc
