@@ -7,9 +7,9 @@ targets=(
     # libjpeg-turbo-07-2017
     # libpng-1.2.56
     # libxml2-v2.9.2
-    #openssl-1.0.1f
+    openssl-1.0.1f #undefined reference to `dfs$OPENSSL_cleanse'..
     # openthread-2018-02-27
-    proj4-2017-08-14
+    #proj4-2017-08-14 #
     # re2-2014-12-09
     #sqlite-2016-11-14
     # vorbis-2017-12-11
@@ -38,30 +38,30 @@ for target in ${targets[@]};
 do
     {
         echo "Build $target"
-        # build with asan off
-        CC=/fuzzer/angora/bin/angora-clang
-        CXX=/fuzzer/angora/bin/angora-clang++
-        CFLAGS='-O3 -fno-omit-frame-pointer'
-        CXXFLAGS="$CFLAGS -stdlib=libc++"
-        FUZZING_ENGINE=coverage
-        AFL_SRC=/fuzzer/afl
-        LIBFUZZER_SRC=/llvm/compiler-rt-12.0.0.src/lib/fuzzer/
-        export CC CXX CFLAGS CXXFLAGS FUZZING_ENGINE AFL_SRC LIBFUZZER_SRC
-        BUILD_SCRIPT=$FTS_DIR/$target/build.sh
-        RUNDIR="$target"
-        mkdir -p $RUNDIR
-        pushd .
-        cd $RUNDIR
-        USE_FAST=1 $BUILD_SCRIPT > /dev/null
-        for EXECUTABLE in $target*-out*;
-        do
-            NEW_NAME=${EXECUTABLE%-out*}
-            NEW_DIR=/d/p/angora/fast/fuzzer-test-suite/$NEW_NAME
-            NEW_PATH=$NEW_DIR/$NEW_NAME
-            mkdir -p $NEW_DIR
-            mv $EXECUTABLE $NEW_PATH
-        done
-        popd
+        # # build with asan off
+        # CC=/fuzzer/angora/bin/angora-clang
+        # CXX=/fuzzer/angora/bin/angora-clang++
+        # CFLAGS='-O3 -fno-omit-frame-pointer'
+        # CXXFLAGS="$CFLAGS -stdlib=libc++"
+        # FUZZING_ENGINE=coverage
+        # AFL_SRC=/fuzzer/afl
+        # LIBFUZZER_SRC=/llvm/compiler-rt-12.0.0.src/lib/fuzzer/
+        # export CC CXX CFLAGS CXXFLAGS FUZZING_ENGINE AFL_SRC LIBFUZZER_SRC
+        # BUILD_SCRIPT=$FTS_DIR/$target/build.sh
+        # RUNDIR="$target"
+        # mkdir -p $RUNDIR
+        # pushd .
+        # cd $RUNDIR
+        # USE_FAST=1 $BUILD_SCRIPT > /dev/null
+        # for EXECUTABLE in $target*-out*;
+        # do
+        #     NEW_NAME=${EXECUTABLE%-out*}
+        #     NEW_DIR=/d/p/angora/fast/fuzzer-test-suite/$NEW_NAME
+        #     NEW_PATH=$NEW_DIR/$NEW_NAME
+        #     mkdir -p $NEW_DIR
+        #     mv $EXECUTABLE $NEW_PATH
+        # done
+        # popd
         #build with asan off
         CC=/fuzzer/angora/bin/angora-clang
         CXX=/fuzzer/angora/bin/angora-clang++

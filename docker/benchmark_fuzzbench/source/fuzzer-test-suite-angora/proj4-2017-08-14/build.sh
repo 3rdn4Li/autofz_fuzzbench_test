@@ -5,8 +5,10 @@
 . $(dirname $0)/../common.sh
 apt-get update && \
     apt-get install -y \
-        make autoconf automake libtool g++ sqlite3 pkg-config wget liblzma-dev zlib1g-dev libssl-dev libsqlite3-dev
+        make autoconf automake libtool g++ pkg-config wget liblzma-dev zlib1g-dev libssl-dev libsqlite3-dev sqlite3
 
+
+echo "/usr/lib/x86_64-linux-gnu/libsqlite3.so.0"|grep .so|sort|uniq|sed 's#^/lib#/usr/lib#g'|sed 's#\.so.*$#.so#g'|grep -v libgcc_s.so|grep -v libstdc++.so|grep -v libc.so|grep -v libm.so|grep -v libpthread.so|xargs -i /fuzzer/angora/tools/gen_library_abilist.sh '{}' discard >> /tmp/abilist.txt
 
 export CXXFLAGS="$CXXFLAGS -DFUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION -pthread -Wl,--no-as-needed -Wl,-ldl -Wl,-lm -Wno-unused-command-line-argument -stdlib=libc++ -O3"
 export CFLAGS="$CFLAGS -DFUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION -pthread -Wl,--no-as-needed -Wl,-ldl -Wl,-lm -Wno-unused-command-line-argument "
@@ -38,10 +40,13 @@ set -x
 # build libcurl.a (builing against Ubuntu libcurl.a doesn't work easily)
 cd curl
 autoreconf -i
-./configure --disable-shared --without-libidn2 --with-openssl --prefix=$SRC/install
+#with-openssl can't be built with taint
+./configure --disable-shared --without-libidn2 --without-ssl --prefix=$SRC/install
 make clean -s
-make -j$(nproc) -s
+set -x
+make -j$(nproc) 
 make install
+set +x
 cd ..
 
 # build libtiff.a
@@ -62,12 +67,11 @@ cmake .. -DBUILD_SHARED_LIBS:BOOL=OFF \
         -DCMAKE_INSTALL_PREFIX=$SRC/install \
         -DBUILD_APPS:BOOL=OFF \
         -DBUILD_TESTING:BOOL=OFF
-make clean -s
-make -j$(nproc) -s
+make -j$(nproc)  
 make install
 cd ..
 
-EXTRA_LIBS="-lpthread -Wl,-Bstatic -lsqlite3 -L$SRC/install/lib -ltiff -lcurl -lssl -lcrypto -lz -Wl,-Bdynamic"
+EXTRA_LIBS="-lpthread -Wl,-Bstatic -lsqlite3 -L$SRC/install/lib -ltiff -lcurl -lcrypto -lz -Wl,-Bdynamic" #removed -lssl 
 
 build_fuzzer()
 {
@@ -82,6 +86,9 @@ build_fuzzer()
 }
 cp $SRC/$LIB_FUZZING_ENGINE .
 build_fuzzer proj_crs_to_crs_fuzzer test/fuzzers/proj_crs_to_crs_fuzzer.cpp
+
+
+
 
 set +x
 cp -r data/* $OUT
