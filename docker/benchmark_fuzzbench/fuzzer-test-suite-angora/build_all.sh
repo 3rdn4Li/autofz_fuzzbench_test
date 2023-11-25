@@ -1,19 +1,19 @@
 #!/bin/bash
 set -x
 targets=(
-    freetype2-2017
-    harfbuzz-1.3.2
-    lcms-2017-03-21
-    libjpeg-turbo-07-2017
-    libpng-1.2.56
-    libxml2-v2.9.2
-    openssl-1.0.1f
-    openthread-2018-02-27
+    # freetype2-2017
+    # harfbuzz-1.3.2
+    # lcms-2017-03-21
+    # libjpeg-turbo-07-2017
+    # libpng-1.2.56
+    # libxml2-v2.9.2
+    #openssl-1.0.1f
+    # openthread-2018-02-27
     proj4-2017-08-14
-    re2-2014-12-09
-    sqlite-2016-11-14
-    vorbis-2017-12-11
-    woff2-2016-05-06
+    # re2-2014-12-09
+    #sqlite-2016-11-14
+    # vorbis-2017-12-11
+    # woff2-2016-05-06
 )
 
 export RUSTUP_HOME=/usr/local/rustup \
@@ -62,7 +62,7 @@ do
             mv $EXECUTABLE $NEW_PATH
         done
         popd
-        # build with asan off
+        #build with asan off
         CC=/fuzzer/angora/bin/angora-clang
         CXX=/fuzzer/angora/bin/angora-clang++
         CFLAGS='-O3 -fno-omit-frame-pointer'

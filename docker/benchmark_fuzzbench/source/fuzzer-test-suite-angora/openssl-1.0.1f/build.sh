@@ -11,7 +11,6 @@ mkdir /work
 export WORK=/work
 export OUT=/out
 rm -rf openssl
-
 git clone \
         --depth 1 \
         --branch openssl-3.0.7 \

@@ -10,6 +10,7 @@ mkdir /out
 mkdir /work
 export WORK=/work
 export OUT=/out
+
 if [[ ! -d $SRC/sqlite3  ]]; then
 mkdir $SRC/sqlite3 && \
     cd $SRC/sqlite3 && \
@@ -29,7 +30,6 @@ pushd sqlite3
 set -x
 echo $PWD
 set +x
-rm -rf build
 mkdir build
 cp ../$LIB_FUZZING_ENGINE build/
 cd build
@@ -44,9 +44,9 @@ export CFLAGS="$CFLAGS -DSQLITE_MAX_LENGTH=128000000 \
                -DSQLITE_PRINTF_PRECISION_LIMIT=1048576 \
                -DSQLITE_DEBUG=1 \
                -DSQLITE_MAX_PAGE_COUNT=16384"             
-               
 ../configure
-make -j$(nproc)
+make clean
+make -j$(nproc) 
 make sqlite3.c
 
 $CC $CFLAGS -I. -c \
