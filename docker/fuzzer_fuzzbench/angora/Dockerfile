@@ -20,7 +20,10 @@ ENV RUSTUP_HOME=/usr/local/rustup \
 WORKDIR /fuzzer/angora
 
 RUN ./build/install_rust.sh
-RUN PREFIX=/fuzzer/angora ./build/install_llvm.sh
+RUN wget -q https://github.com/llvm/llvm-project/releases/download/llvmorg-12.0.1/clang+llvm-12.0.1-x86_64-linux-gnu-ubuntu-16.04.tar.xz \
+    && tar -C /fuzzer/angora -xf clang+llvm-12.0.1-x86_64-linux-gnu-ubuntu-16.04.tar.xz \
+    && rm clang+llvm-12.0.1-x86_64-linux-gnu-ubuntu-16.04.tar.xz \
+    && mv /fuzzer/angora/clang+llvm-12.0.1-x86_64-linux-gnu-ubuntu- /fuzzer/angora/clang+llvm
 
 # RUN sed -e '1146 s|^|//|' \
 #      -i /fuzzer/angora/llvm_mode/dfsan_rt/sanitizer_common/sanitizer_platform_limits_posix.cc

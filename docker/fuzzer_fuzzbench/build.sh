@@ -11,10 +11,10 @@ fuzzer_list=(
     mopt
     fairfuzz
     lafintel
-    #radamsa
+    radamsa
     #libfuzzer
-    #learnafl
     redqueen
+    qsym
 )
 
 USER=$(id -un)
