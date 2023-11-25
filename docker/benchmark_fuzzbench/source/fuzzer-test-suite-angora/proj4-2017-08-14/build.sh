@@ -7,8 +7,10 @@ apt-get update && \
     apt-get install -y \
         make autoconf automake libtool g++ pkg-config wget liblzma-dev zlib1g-dev libssl-dev libsqlite3-dev sqlite3
 
-
+if [ ! -e /tmp/proj4_sig ]; then
 echo "/usr/lib/x86_64-linux-gnu/libsqlite3.so.0"|grep .so|sort|uniq|sed 's#^/lib#/usr/lib#g'|sed 's#\.so.*$#.so#g'|grep -v libgcc_s.so|grep -v libstdc++.so|grep -v libc.so|grep -v libm.so|grep -v libpthread.so|xargs -i /fuzzer/angora/tools/gen_library_abilist.sh '{}' discard >> /tmp/abilist.txt
+echo "a" > /tmp/proj4_sig
+fi
 
 export CXXFLAGS="$CXXFLAGS -DFUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION -pthread -Wl,--no-as-needed -Wl,-ldl -Wl,-lm -Wno-unused-command-line-argument -stdlib=libc++ -O3"
 export CFLAGS="$CFLAGS -DFUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION -pthread -Wl,--no-as-needed -Wl,-ldl -Wl,-lm -Wno-unused-command-line-argument "
