@@ -10,7 +10,7 @@ apt-get update && \
         zlib1g-dev  liblzma-dev 
 curl -LO http://mirrors.kernel.org/ubuntu/pool/main/a/automake-1.16/automake_1.16.5-1.3_all.deb && \
     apt install ./automake_1.16.5-1.3_all.deb
-
+rm -rf libxml2
 get_git_revision https://gitlab.gnome.org/GNOME/libxml2.git c7260a47f19e01f4f663b6a56fbdc2dafd8a6e7e libxml2
 export SRC="$PWD"
 rm -rf /out
@@ -29,8 +29,8 @@ cp $LIB_FUZZING_ENGINE /lib/x86_64-linux-gnu/
 cp $LIB_FUZZING_ENGINE libxml2/fuzz
 
 pushd libxml2
-export CFLAGS="$CFLAGS -fsanitize=unsigned-integer-overflow -fno-sanitize-recover=unsigned-integer-overflow -fno-omit-frame-pointer -gline-tables-only -DFUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION"
-export CXXFLAGS="$CXXFLAGS -fsanitize=unsigned-integer-overflow -fno-sanitize-recover=unsigned-integer-overflow -fno-omit-frame-pointer -gline-tables-only -DFUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION"
+export CFLAGS="$CFLAGS -fno-omit-frame-pointer -gline-tables-only -DFUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION"
+export CXXFLAGS="$CXXFLAGS -fno-omit-frame-pointer -gline-tables-only -DFUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION"
 
 
 export V=1

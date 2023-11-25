@@ -7,6 +7,7 @@
 get_git_revision https://github.com/behdad/harfbuzz.git  cb47dca74cbf6d147aac9cf3067f249555aa68b1 SRC
 
 build_fuzzer
+#pip install --upgrade pip
 
 python3.8 -m pip install ninja meson==0.56.0
 
@@ -41,16 +42,16 @@ cd SRC && meson --default-library=static --wrap-mode=nodownload \
 cd .. && cp *.a BUILD
 
 # Build the fuzzers.
-set -x
-ninja -v -j$(nproc) -C $build test/fuzzing/hb-shape-fuzzer
-set +x
+
+ninja --verbose -j$(nproc) -C $build test/fuzzing/hb-shape-fuzzer 1>&2
+
 # mv $build/test/fuzzing/hb-shape-fuzzer $OUT/
 
 # Archive and copy to $OUT seed corpus if the build succeeded.
 
 if [[ ! -d /seeds/fuzzer-test-suite/harfbuzz-1.3.2 ]]; then
-    mkdir all-fonts
-    mkdir /seeds/fuzzer-test-suite/harfbuzz-1.3.2
+    mkdir -p all-fonts
+    mkdir -p /seeds/fuzzer-test-suite/harfbuzz-1.3.2
     for d in \
         SRC/test/shape/data/in-house/fonts \
         SRC/test/shape/data/aots/fonts \

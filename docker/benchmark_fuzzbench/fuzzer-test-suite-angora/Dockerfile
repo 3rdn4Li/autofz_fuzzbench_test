@@ -3,7 +3,7 @@ ARG BENCHMARK_PREFIX
 FROM $BENCHMARK_PREFIX/fuzzer-test-suite as bench_fts
 FROM $FUZZER_PREFIX/angora
 RUN mkdir -p /d/p/angora
-
+ARG a=1
 COPY --from=bench_fts /d/p/normal /d/p/normal
 
 COPY source/ /autofz_bench
